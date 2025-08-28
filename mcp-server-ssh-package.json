@@ -1,0 +1,21 @@
+{
+  "name": "mcp-server-ssh",
+  "version": "1.0.0",
+  "description": "MCP Server for SSH remote management of Ontrail servers",
+  "main": "mcp-server-ssh.js",
+  "type": "module",
+  "scripts": {
+    "start": "node mcp-server-ssh.js",
+    "dev": "node --watch mcp-server-ssh.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["mcp", "ssh", "remote", "server", "management"],
+  "author": "Ontrail Team",
+  "license": "MIT"
+}
+

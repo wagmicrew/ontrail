@@ -1,0 +1,30 @@
+{
+  "server": {
+    "user": "root",
+    "host": "ontrail.tech",
+    "appDirectory": "/var/www/ontrailapp",
+    "nodeEnv": "production"
+  },
+  "database": {
+    "name": "ontrail_db",
+    "user": "ontrail_user",
+    "password": "secure_password_change_this_in_production",
+    "host": "localhost",
+    "port": 5432
+  },
+  "git": {
+    "repository": "https://github.com/wagmicrew/ontrail.git",
+    "branch": "main"
+  },
+  "nginx": {
+    "siteName": "ontrail.tech",
+    "port": 3000,
+    "sslEnabled": false
+  },
+  "pm2": {
+    "appName": "ontrail-app",
+    "maxMemory": "1G",
+    "instances": 1
+  }
+}
+
