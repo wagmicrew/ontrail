@@ -474,3 +474,4 @@ fi
 
 echo ""
 echo -e "${GREEN}🎊 All systems configured and ready!${NC}"
+

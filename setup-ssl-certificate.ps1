@@ -58,3 +58,4 @@ Write-Host "  ssh root@$ServerHost 'certbot certificates'" -ForegroundColor Yell
 Write-Host "" -ForegroundColor Yellow
 Write-Host "To manually renew certificate:" -ForegroundColor Yellow
 Write-Host "  ssh root@$ServerHost 'certbot renew'" -ForegroundColor Yellow
+

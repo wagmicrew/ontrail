@@ -146,3 +146,4 @@ echo https://dev.dintrafikskolahlm.se
 echo.
 echo If you still have issues, the original HTTP/2 config is backed up as:
 echo dintrafikskolahlm_all.conf.disabled
+

@@ -164,3 +164,4 @@ Write-Host "- View setup logs above for any errors" -ForegroundColor White
 Write-Host "" -ForegroundColor White
 
 Write-Host "🎯 Your Ontrail Social-Fi application is ready!" -ForegroundColor Green
+

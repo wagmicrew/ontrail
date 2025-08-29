@@ -235,3 +235,4 @@ Write-Host "" -ForegroundColor Cyan
 Write-Host "If you still have issues, the fix script created backups:" -ForegroundColor Yellow
 Write-Host "• Original config: dintrafikskolahlm_all.conf.disabled" -ForegroundColor White
 Write-Host "• HTTP/1.1 config: dintrafikskolahlm_all.conf (current)" -ForegroundColor White
+

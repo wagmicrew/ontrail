@@ -144,3 +144,4 @@ Write-Host "🔐 Security Notes:" -ForegroundColor Yellow
 Write-Host "- Change the default password in production" -ForegroundColor Yellow
 Write-Host "- Update OAuth credentials in .env.local" -ForegroundColor Yellow
 Write-Host "- Configure proper firewall rules for PostgreSQL" -ForegroundColor Yellow
+

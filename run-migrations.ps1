@@ -173,3 +173,4 @@ Write-Host ""
 Write-Host "2. Test the application at: https://ontrail.tech" -ForegroundColor White
 Write-Host ""
 Write-Host "3. Verify database connectivity in the application logs" -ForegroundColor White
+

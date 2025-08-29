@@ -139,3 +139,4 @@ Write-Host "   1. Restart Cursor IDE to load the new MCP server"
 Write-Host "   2. Test the connection by asking Cursor to 'check server status'"
 Write-Host "   3. Use commands like 'run command on server: pm2 status'"
 
+

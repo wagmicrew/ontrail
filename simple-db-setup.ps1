@@ -41,3 +41,4 @@ Write-Host "  Password: Tropictiger2025!"
 Write-Host "  URL: postgresql://ontrail_user:Tropictiger2025!@localhost:5432/ontrail"
 Write-Host ""
 Write-Host "Application: https://ontrail.tech" -ForegroundColor Cyan
+

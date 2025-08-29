@@ -189,3 +189,4 @@ Write-Host "• Config SSH: ssh ontrail-server" -ForegroundColor White
 Write-Host "• Deployment: .\ontrail-deploy.ps1 -Command <command>" -ForegroundColor White
 Write-Host "" -ForegroundColor Yellow
 Write-Host "All connections from Cursor to server are now passwordless!" -ForegroundColor Green
+

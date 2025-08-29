@@ -296,3 +296,4 @@ If you encounter issues:
 - [ ] Application accessible at https://ontrail.tech
 
 **Congratulations! Your Ontrail Social-Fi application now has a fully functional PostgreSQL database! 🚀**
+

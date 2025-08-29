@@ -44,7 +44,7 @@ function Invoke-RemoteCommand {
     param([string]$Command)
     Write-Status "Running on server: $Command"
     try {
-        $result = ssh -o StrictHostKeyChecking=no "$SERVER_USER@$SERVER_HOST" $Command 2>&1
+        $result = ssh -i "$env:USERPROFILE\.ssh\id_rsa_ontrail" -o StrictHostKeyChecking=no "$SERVER_USER@$SERVER_HOST" $Command 2>&1
         if ($LASTEXITCODE -ne 0) {
             Write-Error "Remote command failed with exit code $LASTEXITCODE"
             Write-Error $result
@@ -62,7 +62,7 @@ function Copy-ToServer {
     param([string]$Source, [string]$Destination)
     Write-Status "Copying $Source to server:$Destination"
     try {
-        $result = scp -o StrictHostKeyChecking=no -r $Source "$SERVER_USER@$SERVER_HOST`:$Destination" 2>&1
+        $result = scp -i "$env:USERPROFILE\.ssh\id_rsa_ontrail" -o StrictHostKeyChecking=no -r $Source "$SERVER_USER@$SERVER_HOST`:$Destination" 2>&1
         if ($LASTEXITCODE -ne 0) {
             Write-Error "SCP failed with exit code $LASTEXITCODE"
             Write-Error $result
@@ -218,26 +218,62 @@ EOF
     Write-Status "Password: secure_password_change_this_in_production"
 }
 
-function Invoke-AppDeployment {
-    Write-Header "Deploying Ontrail Application"
+function Invoke-GitDeployment {
+    Write-Header "Deploying Ontrail Application via Git"
 
-    # Copy application files
-    Write-Status "Copying application files to server..."
-    Copy-ToServer "../webapp" "$APP_DIR/webApp"
+    # Push local changes to git first
+    Write-Status "Committing and pushing local changes..."
+    git add .
+    git commit -m "Deploy to ontrail.tech - $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" 2>$null
+    git push origin master
+
+    # Pull changes on server (in the correct webApp directory)
+    Write-Status "Pulling changes on server..."
+    Invoke-RemoteCommand "cd /var/www/ontrailapp/webApp && git pull origin master"
 
     # Install dependencies
-    Invoke-RemoteCommand "cd $APP_DIR/webApp && npm install"
+    Invoke-RemoteCommand "cd /var/www/ontrailapp/webApp && npm install"
 
-    # Copy environment file if it exists
-    if (Test-Path "../webapp/.env.local") {
-        Copy-ToServer "../webapp/.env.local" "$APP_DIR/webApp/.env.local"
+    # Copy environment file if it exists locally
+    if (Test-Path ".env.local") {
+        Copy-ToServer ".env.local" "/var/www/ontrailapp/webApp/.env.local"
     }
 
     # Run database migrations
-    Invoke-RemoteCommand "cd $APP_DIR/webApp && npx drizzle-kit migrate"
+    Invoke-RemoteCommand "cd /var/www/ontrailapp/webApp && npx drizzle-kit migrate"
 
     # Build application
-    Invoke-RemoteCommand "cd $APP_DIR/webApp && npm run build"
+    Invoke-RemoteCommand "cd /var/www/ontrailapp/webApp && npm run build"
+
+    # Restart PM2 process
+    Invoke-RemoteCommand "pm2 restart ontrail-app"
+
+    Write-Status "Application deployed successfully via Git!"
+}
+
+function Invoke-AppDeployment {
+    Write-Header "Deploying Ontrail Application (Legacy SCP Method)"
+
+    # Copy application files
+    Write-Status "Copying application files to server..."
+    Copy-ToServer "." "/var/www/ontrailapp/webApp"
+
+    # Install dependencies
+    Invoke-RemoteCommand "cd /var/www/ontrailapp/webApp && npm install"
+
+    # Copy environment file if it exists
+    if (Test-Path ".env.local") {
+        Copy-ToServer ".env.local" "/var/www/ontrailapp/webApp/.env.local"
+    }
+
+    # Run database migrations
+    Invoke-RemoteCommand "cd /var/www/ontrailapp/webApp && npx drizzle-kit migrate"
+
+    # Build application
+    Invoke-RemoteCommand "cd /var/www/ontrailapp/webApp && npm run build"
+
+    # Restart PM2 process
+    Invoke-RemoteCommand "pm2 restart ontrail-app"
 
     Write-Status "Application deployed successfully!"
 }
@@ -414,6 +450,9 @@ switch ($Command) {
         New-Database
     }
     "deploy" {
+        Invoke-GitDeployment
+    }
+    "deploy-scp" {
         Invoke-AppDeployment
     }
     "start" {

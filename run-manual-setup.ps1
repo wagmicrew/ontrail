@@ -59,3 +59,4 @@ Write-Host "" -ForegroundColor White
 Write-Host "🌐 Test your application: https://ontrail.tech" -ForegroundColor Cyan
 Write-Host "" -ForegroundColor White
 Write-Host "🔧 Check PM2 logs: pm2 logs ontrail-app" -ForegroundColor Yellow
+

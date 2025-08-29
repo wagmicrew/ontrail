@@ -777,3 +777,4 @@ Environment:   /var/www/[app]/.env.local
 *Last Updated: August 28, 2025*  
 *Server: 85.208.51.194*  
 *Domains: 3 active (dintrafikskolahlm.se, dev.dintrafikskolahlm.se, ontrail.tech)*
+

@@ -55,3 +55,4 @@ Write-Host "• Restart app: ssh -i $SSHKeyPath root@$ServerHost 'pm2 restart on
 Write-Host "• Monitor: ssh -i $SSHKeyPath root@$ServerHost 'tail -f /var/www/ontrailapp/logs/monitor.log'" -ForegroundColor White
 Write-Host "" -ForegroundColor Yellow
 Write-Host "🎊 Production setup complete!" -ForegroundColor Green
+

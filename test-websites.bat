@@ -26,3 +26,4 @@ echo 3. Try a different browser
 echo 4. Wait a few minutes for DNS propagation
 echo.
 pause
+

@@ -138,3 +138,4 @@ echo "📞 Troubleshooting:"
 echo "- Check PM2 logs: pm2 logs ontrail-app"
 echo "- Check PostgreSQL: PGPASSWORD='Tropictiger2025!' psql -h localhost -U ontrail_user -d ontrail"
 echo "- View PostgreSQL logs: sudo tail -f /var/log/postgresql/postgresql-*.log"
+

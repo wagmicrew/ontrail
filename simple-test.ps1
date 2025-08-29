@@ -91,3 +91,4 @@ Write-Host "2. Run setup script if needed: .\setup-mcp-ssh.ps1" -ForegroundColor
 Write-Host "3. Restart Cursor IDE" -ForegroundColor White
 Write-Host "4. Test in Cursor: Ask 'Check server status'" -ForegroundColor White
 
+

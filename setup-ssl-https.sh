@@ -241,3 +241,4 @@ echo "• Check certificate status: certbot certificates"
 echo "• Manual renewal: certbot renew"
 echo ""
 echo -e "${GREEN}🎉 HTTPS setup complete!${NC}"
+

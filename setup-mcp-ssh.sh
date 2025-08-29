@@ -79,3 +79,4 @@ echo "   SSH Key: $SSH_KEY_PATH"
 echo ""
 echo "💡 You can now use Cursor to remotely manage your Ontrail server!"
 
+
