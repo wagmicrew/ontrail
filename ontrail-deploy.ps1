@@ -419,11 +419,16 @@ function Show-Help {
     Write-Host "  setup-server    Setup server directory and permissions"
     Write-Host "  setup-nginx     Setup nginx configuration for ontrail.tech"
     Write-Host "  setup-db        Setup PostgreSQL database"
-    Write-Host "  deploy          Deploy application to server"
+    Write-Host "  reset-postgres  Reset postgres user password only"
+    Write-Host "  reset-db        Complete PostgreSQL reinstall"
+    Write-Host "  deploy          Deploy application to server via git"
+    Write-Host "  deploy-scp      Deploy via SCP (legacy method)"
     Write-Host "  start           Start application with PM2"
     Write-Host "  sync            Sync from git repository"
     Write-Host "  status          Show server status"
     Write-Host "  backup          Create database backup"
+    Write-Host "  logs            Show PM2 application logs"
+    Write-Host "  shell           Open interactive SSH shell"
     Write-Host "  run <command>   Run arbitrary command on server"
     Write-Host "  full-setup      Run complete setup (ssh, server, nginx, db, deploy, start)"
     Write-Host "  help            Show this help message"
@@ -433,6 +438,86 @@ function Show-Help {
     Write-Host "  .\ontrail-deploy.ps1 -Command deploy"
     Write-Host "  .\ontrail-deploy.ps1 -Command run -RemoteCommand 'pm2 restart ontrail-app'"
     Write-Host "  .\ontrail-deploy.ps1 -Command full-setup"
+}
+
+function Invoke-PostgresReset {
+    Write-Header "Resetting PostgreSQL User Password"
+
+    Write-Status "Stopping PostgreSQL service..."
+    Invoke-RemoteCommand "systemctl stop postgresql"
+
+    Write-Status "Starting PostgreSQL in single-user mode to reset password..."
+    Invoke-RemoteCommand "su - postgres -c 'postgres --single -D /var/lib/postgresql/17/main' <<< \"ALTER USER postgres PASSWORD 'new_secure_postgres_password';\""
+
+    Write-Status "Starting PostgreSQL service..."
+    Invoke-RemoteCommand "systemctl start postgresql"
+
+    Write-Status "Testing postgres user connection..."
+    Invoke-RemoteCommand "PGPASSWORD=new_secure_postgres_password psql -U postgres -h localhost -c 'SELECT version();'"
+
+    Write-Status "PostgreSQL password reset complete!"
+    Write-Status "New postgres password: new_secure_postgres_password"
+}
+
+function Invoke-PostgresReinstall {
+    Write-Header "Reinstalling PostgreSQL Completely"
+
+    Write-Status "Stopping PostgreSQL service..."
+    Invoke-RemoteCommand "systemctl stop postgresql"
+
+    Write-Status "Removing PostgreSQL completely..."
+    Invoke-RemoteCommand "apt-get purge -y postgresql*"
+    Invoke-RemoteCommand "rm -rf /var/lib/postgresql"
+    Invoke-RemoteCommand "rm -rf /etc/postgresql"
+    Invoke-RemoteCommand "rm -rf /var/log/postgresql"
+
+    Write-Status "Installing PostgreSQL fresh..."
+    Invoke-RemoteCommand "apt-get update"
+    Invoke-RemoteCommand "apt-get install -y postgresql postgresql-contrib"
+
+    Write-Status "Starting PostgreSQL service..."
+    Invoke-RemoteCommand "systemctl start postgresql"
+    Invoke-RemoteCommand "systemctl enable postgresql"
+
+    Write-Status "Setting up postgres user password..."
+    Invoke-RemoteCommand "su - postgres -c \"psql -c \\\"ALTER USER postgres PASSWORD 'new_secure_postgres_password';\\\"\""
+
+    Write-Status "Creating ontrail database and user..."
+    Invoke-RemoteCommand "cat > /tmp/create_ontrail_db.sql << 'EOF'
+CREATE USER ontrail_user WITH SUPERUSER;
+ALTER USER ontrail_user PASSWORD NULL;
+CREATE DATABASE ontrail_db OWNER ontrail_user;
+GRANT ALL PRIVILEGES ON DATABASE ontrail_db TO ontrail_user;
+GRANT CREATE ON SCHEMA public TO ontrail_user;
+EOF"
+    Invoke-RemoteCommand "su - postgres -c 'psql -f /tmp/create_ontrail_db.sql'"
+
+    Write-Status "Configuring passwordless local authentication..."
+    Invoke-RemoteCommand "find /etc/postgresql -name 'pg_hba.conf' -exec sed -i 's/local   all             postgres                                md5/local   all             postgres                                peer/g' {} \;"
+    Invoke-RemoteCommand "find /etc/postgresql -name 'pg_hba.conf' -exec sed -i 's/local   all             all                                     md5/local   all             all                                     peer/g' {} \;"
+    Invoke-RemoteCommand "find /etc/postgresql -name 'pg_hba.conf' -exec sed -i '/host    all             all             127.0.0.1\/32            scram-sha-256/i\\host    all             all             127.0.0.1\/32            trust' {} \;"
+
+    Write-Status "Reloading PostgreSQL configuration..."
+    Invoke-RemoteCommand "systemctl reload postgresql"
+
+    Write-Status "Testing database connection..."
+    Invoke-RemoteCommand "psql -U ontrail_user -d ontrail_db -c 'SELECT version();'"
+
+    Write-Status "PostgreSQL reinstallation complete!"
+    Write-Status "Postgres password: new_secure_postgres_password"
+    Write-Status "Ontrail database: ontrail_db"
+    Write-Status "Ontrail user: ontrail_user (passwordless locally)"
+}
+
+function Show-Logs {
+    Write-Header "Application Logs"
+    Invoke-RemoteCommand "pm2 logs ontrail-app --lines 20"
+}
+
+function Invoke-Shell {
+    Write-Header "Interactive Shell"
+    Write-Host "Connecting to ontrail.tech server..." -ForegroundColor Green
+    ssh -i "$env:USERPROFILE\.ssh\id_rsa_ontrail" root@85.208.51.194
 }
 
 # Main script logic
@@ -474,6 +559,18 @@ switch ($Command) {
             exit 1
         }
         Invoke-ArbitraryCommand $RemoteCommand
+    }
+    "reset-postgres" {
+        Invoke-PostgresReset
+    }
+    "reset-db" {
+        Invoke-PostgresReinstall
+    }
+    "logs" {
+        Show-Logs
+    }
+    "shell" {
+        Invoke-Shell
     }
     "full-setup" {
         Write-Header "Running Complete Ontrail Setup"
